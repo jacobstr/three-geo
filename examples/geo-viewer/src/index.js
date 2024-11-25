@@ -40,7 +40,7 @@ class App extends Threelet {
         this.render(); // first time
 
         this.anim = new Anim(this.render, this.onAnimate.bind(this));
-        this.gui = App.createGui(this.guiCallbacks(), this.env, this.monitor.dom);
+        this.gui = App.createGui(this.guiCallbacks(), this.env, this.monitor.dom, this.loader, this);
 
         this.monitor.updateTerrain(this.origin, this.zoom);
         this.monitor.updateMap(this.map.getZoom());
@@ -153,7 +153,7 @@ class App extends Threelet {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    static createGui(cbs, env, monitorDom) {
+    static createGui(cbs, env, monitorDom, loader, app) {
         const { mode, title } = this.parseQuery();
         const defaults = {
             isDev: () => {},
@@ -166,10 +166,13 @@ class App extends Threelet {
             loc: title ? title.replace('_', ' ') : '',
             leaflet: true,
             media: false,
+            hidemap: false,
+            minDepth: 0,
+            maxDepth: 2,
             sourceCode: () => {},
         };
 
-        const gh = new GuiHelper(env)
+        const gh = new GuiHelper(env, loader, app)
             .setDefaults(defaults)
             .setCallbacks(cbs)
             .appendToFooter(monitorDom);

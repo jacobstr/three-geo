@@ -24,19 +24,13 @@ const constantColorShader = {
 };
 
 
-// Create the material
-const basicMaterial = new THREE.ShaderMaterial({
-  uniforms: constantColorShader.uniforms,
-  vertexShader: constantColorShader.vertexShader,
-  fragmentShader: constantColorShader.fragmentShader
-});
-
 class Loader {
     constructor(scene, env, camera) {
+        env.foo = "var";
         camera = camera;
 
         // ShaderMaterial with Vertex and Fragment Shaders
-        this.distanceMaterial = new THREE.ShaderMaterial({
+        this.material = new THREE.ShaderMaterial({
           vertexShader: `
             varying vec3 vWorldPosition;
 
@@ -75,8 +69,8 @@ class Loader {
             uCameraPosition: { value: camera.position }, // Updated uniform name
             nearColor: { value: new THREE.Color(0x0000ff) }, // Blue
             farColor: { value: new THREE.Color(0xff0000) },  // Red
-            minDepth: { value: 0.0 }, // Closest distance
-            maxDepth: { value: 1.9 }, // Farthest distance
+            minDepth: { value: env.minDepth }, // Closest distance
+            maxDepth: { value: env.maxDepth }, // Farthest distance
           },
         });
 
@@ -116,9 +110,12 @@ class Loader {
                         refresh();
                     }),
                     onSatelliteMat: plane => { // to be called *after* `onRgbDem`
-                        console.log("Got satellite mat plane");
-                        console.log(plane);
-                        plane.material = this.distanceMaterial;
+                        // Hack to memoize the original material of the plane.
+                        // In case we want to toggle.
+                        if (this.rgbMaterial === undefined) {
+                            this.rgbMaterial = plane.material;
+                        }
+                        plane.material = this.material;
 
                         this._rgbMats[plane.name] = plane.material;
                         refresh();

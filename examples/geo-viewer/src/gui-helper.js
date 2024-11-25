@@ -1,11 +1,16 @@
 import OoGui from 'oo-gui/src';
 
 class GuiHelper extends OoGui {
-    constructor(env) {
+    constructor(env, loader, app) {
         super(new Object() /* data */, {
             title: 'geo-viewer',
             width: 240,
         });
+
+        // Hack, pass the loader around so we can modify the material shader
+        // based on inputs.
+        this.loader = loader;
+        this.app = app;
 
         this.onChangeMode = null;
         this.onCapture = null;
@@ -70,6 +75,32 @@ class GuiHelper extends OoGui {
             .onChange(tf => {
                 this.onChangeGrids(tf);
                 data.grids = tf;
+            });
+
+        gui.add(params, 'hidemap')
+            .name('Hide Map')
+            .onChange(value => {
+              if (value == true) {
+                document.getElementById('map-wrapper').style.display = "none";
+              } else {
+                document.getElementById('map-wrapper').style.display = "block";
+              }
+            });
+
+        gui.add(params, 'minDepth')
+            .name('Min Depth')
+            .onChange(value => {
+              this.env.minDepth = value;
+              this.loader.material.uniforms.minDepth.value = value;
+              this.app.render();
+            });
+
+        gui.add(params, 'maxDepth')
+            .name('Max Depth')
+            .onChange(value => {
+              this.env.maxDepth = value;
+              this.loader.material.uniforms.maxDepth.value = value;
+              this.app.render();
             });
 
         this._autoOrbitController = gui.add(params, 'autoOrbit')

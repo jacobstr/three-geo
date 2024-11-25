@@ -17,5 +17,8 @@
         "leaflet-geosearch": "^2.7.0",
         "lil-gui": "^0.16.1",
         "oo-gui": "0.1.0"
+    },
+    "dependencies": {
+        "serve": "^14.2.4"
     }
 }

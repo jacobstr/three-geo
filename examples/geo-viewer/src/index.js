@@ -78,7 +78,7 @@ class App extends Threelet {
 
         //
 
-        const loader = new Loader(this.scene, this.env);
+        const loader = new Loader(this.scene, this.env, this.camera);
         const { origin, radius, zoom, vis, title } = App.resolveParams(this.env);
         const projection = loader.projection(origin, radius);
 

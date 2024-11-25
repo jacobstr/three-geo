@@ -2,9 +2,39 @@ import ThreeGeo from '../../../src';
 
 const { THREE } = window;
 
+var camera = null;
+
+// Shader code
+const constantColorShader = {
+  uniforms: {
+    color: { value: new THREE.Color(0xff0000) } // Default red color
+  },
+  vertexShader: `
+    void main() {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 color;
+
+    void main() {
+      gl_FragColor = vec4(color, 1.0); // Constant color with full opacity
+    }
+  `
+};
+
+// Create the material
+const basicMaterial = new THREE.ShaderMaterial({
+  uniforms: constantColorShader.uniforms,
+  vertexShader: constantColorShader.vertexShader,
+  fragmentShader: constantColorShader.fragmentShader
+});
+
 class Loader {
-    constructor(scene, env) {
+    constructor(scene, env, camera) {
+        camera = camera;
         this._scene = scene;
+        this._camera = camera;
         this._tgeo = new ThreeGeo({
             unitsSide: 1.0,
             tokenMapbox: env.tokenMapbox,
@@ -39,7 +69,10 @@ class Loader {
                         refresh();
                     }),
                     onSatelliteMat: plane => { // to be called *after* `onRgbDem`
-                        plane.material.side = THREE.DoubleSide;
+                        console.log("Got satellite mat plane");
+                        console.log(plane);
+                        plane.material = basicMaterial;
+
                         this._rgbMats[plane.name] = plane.material;
                         refresh();
                         res();
